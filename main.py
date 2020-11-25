@@ -72,15 +72,12 @@ class Program:                  # tak sobie mysle że będzie to na pewno dział
 
 LIBRARIES = []
 
-num_of_books, number_of_libraries, time = map(int, input().split())     #
-                                                                        #
-scores_of_books = list(map(int, input().split()))                       #
-                                                                        #
-for library in range(number_of_libraries):                              #
-    b, time, per_day = map(int, input().split())                        #   Kod wczytujący dane, przebia je na ksiązki i biblioteki
-    books_in_library = list(map(int, input().split()))                  #
-    books = []                                                          #
-    for book in books_in_library:                                       #
-        books.append(Book(book, scores_of_books[book]))                 #
-    LIBRARIES.append(Library(library, books, time, per_day))            #
-
+num_of_books, number_of_libraries, time = map(int, input().split())         #
+                                                                            #
+scores_of_books = list(map(int, input().split()))                           #
+                                                                            #
+for library in range(number_of_libraries):                                  #
+    b, time, per_day = map(int, input().split())                            #   Kod wczytujący dane, przebia je na ksiązki i biblioteki
+    books_in_library = list(map(int, input().split()))                      #
+    books = [Book(book, scores_of_books[book]) for book in books_in_library]    #
+    LIBRARIES.append(Library(library, books, time, per_day))                    #
