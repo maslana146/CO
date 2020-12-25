@@ -1,83 +1,100 @@
-# Znalazłem jakies linki do githuba z tym problemem:
+# The code below is very bad. Poorly optimized, does not use OOP...:
 # https://github.com/rgab1508/hashcode
 # https://github.com/Brinfer/HashCode-2020/blob/main/src/QualificationRound/Class/Library.py
 # https://github.com/pgimalac/hashcode-evaluator/tree/master/2020-qualification-round
+# https://towardsdatascience.com/google-hash-code-2020-a-greedy-approach-2dd4587b6033
+# https://www.linkedin.com/pulse/google-hash-code-2020-discussing-my-solution-scored-223-prateek/?articleId=6641016885955657728
+
 
 # TEST INPUT DATA:
-# 6 2 7
-# 1 2 3 6 5 4
-# 5 2 2
-# 0 1 2 3 4
-# 4 3 1
-# 3 2 5 0
+# 6 2 7  - books, libraries, deadline
+# 1 2 3 6 5 4 - scores for books
+# 5 2 2  - library 0 - number of books, signup, max shipping per day
+# 0 1 2 3 4 - books in library 0
+# 4 3 1 - library 1 - 4 books, signup time, shipping per day
+# 3 2 5 0 - books in library1
+
+import Library
+import Book
+
+
+def read_from_file(file_name):
+
+    file = open(file_name, 'r').readlines()
+
+    num_of_books, num_of_libraries, max_time = map(int, file[0].split())
+    scores_of_books = list(map(int, file[1].split()))
+
+    line = 2
+    for library in range(num_of_libraries):
+        num_of_books_in_lib, sign_up_time, books_per_day = map(int, file[line].split())
+        books_in_library = list(map(int, file[line+1].split()))
+        line += 2
+
+        books = [Book.Book(book, scores_of_books[book]) for book in books_in_library]
+        libraries.append(Library.Library(library, books_in_library, sign_up_time, num_of_books_in_lib, books_per_day))
+
+    return num_of_books, num_of_libraries, max_time, scores_of_books
+
+
+def get_best_books(library, books_scanned, current_time, max_time, scores_of_books):
+    time = max_time - library.sign_up_time - current_time
+
+    sorted_books = sorted(library.books - books_scanned, key=lambda b: -scores_of_books[b])
+
+    return list(sorted_books)[:time*library.books_per_day]
+
+
+def score(library, books_scanned, current_time, libraries_signed, max_time, scores_of_books):
+    if library in libraries_signed:
+        return float('-inf')
+
+    possible_books = get_best_books(library, books_scanned, current_time, max_time, scores_of_books)
+
+    score = sum([scores_of_books[book_id] for book_id in possible_books])
+    score /= library.sign_up_time
+
+    return score
+
+
+def schedule(libraries, max_time, scores_of_books):
+    results_books = results_libraries = []
+    libraries_signed = set()
+    books_scanned = set()
+    current_time = 0
+
+    for iteration in range(len(libraries)):
+        scores = [score(library,
+                        books_scanned,
+                        current_time,
+                        libraries_signed,
+                        max_time,
+                        scores_of_books) for library in libraries]
+
+        best_library = scores.index(max(scores))
+
+        best_books = get_best_books(libraries[best_library], books_scanned, current_time, max_time, scores_of_books)
+
+        if best_library in libraries_signed:
+            break
+
+        current_time += libraries[best_library].sign_up_time
+
+        if current_time >= max_time:
+            break
+
+        results_books.append(best_books)
+        results_libraries.append(best_library)
+
+        books_scanned = books_scanned.union(set(best_books))
+        libraries_signed.add(libraries[best_library])
+
+    return results_books, results_libraries
+
+
+libraries = []
+num_of_books, num_of_libraries, max_time, scores_of_books = read_from_file('input_file.txt')
+schedule(libraries, max_time, scores_of_books)
 
 
 
-class Book:
-    def __init__(self, type, points):
-        self.book_id = type         # There are B different books with IDs from 0 to B–1
-        self.score = points         # the score that is awarded when the book is scanned.
-        self.borrow = False
-
-    def __str__(self):
-        return "\nBook ID: %d \n " \
-               "Book score: %d \n"  % \
-               (self.book_id, self.score)
-
-    def boroowBook(self):
-        self.borrow = True   # borrows the book
-
-    def isAvailable(self):   # was borrowed or not
-        return not self.borrow
-
-
-
-
-
-class Library:
-    def __init__(self, type, books, time, number):
-        self.library_id = type                  # There are L different libraries with IDs from 0 to L–1.
-        self.set_of_books = books               # the set of books in the library,
-        self.sign_up_time = time                # the time in days that it takes to sign the library up for scanning,
-        self.books_per_day = number             # the number of books that can be scanned each day from the library once the library is signed up
-
-        self.posibleScore()                     # maximum possible score
-
-    def __str__(self):
-        return "Library ID: %d\n " \
-               "List of books: %s\n " \
-               "Time to sign up: %d\n " \
-               "Books per day: %d" % \
-               (self.library_id,
-                ''.join(str(i) for i in self.set_of_books),
-                self.sign_up_time,
-                self.books_per_day)
-
-    def posibleScore(self):         # returns the maximum possible score
-        pos_score = 0
-        for book in self.set_of_books:
-
-            pos_score += book.score
-        return pos_score
-
-
-class Program:                  # tak sobie mysle że będzie to na pewno działało na jakiejś rekurencji daltego zrobilem
-    def __init__(self):         # tą klase program by trzymała wyniki
-        self.max_score = 0
-        self.visited_libraries = []
-        self.borrowed_books = []
-
-
-
-
-LIBRARIES = []
-
-num_of_books, number_of_libraries, time = map(int, input().split())         #
-                                                                            #
-scores_of_books = list(map(int, input().split()))                           #
-                                                                            #
-for library in range(number_of_libraries):                                  #
-    b, time, per_day = map(int, input().split())                            #   Kod wczytujący dane, przebia je na ksiązki i biblioteki
-    books_in_library = list(map(int, input().split()))                      #
-    books = [Book(book, scores_of_books[book]) for book in books_in_library]    #
-    LIBRARIES.append(Library(library, books, time, per_day))                    #
