@@ -26,21 +26,22 @@ def read_from_file(file_name):
     scores_of_books = list(map(int, file[1].split()))
 
     line = 2
+    libraries = []
     for library in range(num_of_libraries):
         num_of_books_in_lib, sign_up_time, books_per_day = map(int, file[line].split())
-        books_in_library = list(map(int, file[line+1].split()))
+        books_in_library = set(map(int, file[line+1].split()))
         line += 2
 
-        books = [Book.Book(book, scores_of_books[book]) for book in books_in_library]
+        books = set(Book.Book(book, scores_of_books[book]) for book in books_in_library)
         libraries.append(Library.Library(library, books_in_library, sign_up_time, num_of_books_in_lib, books_per_day))
 
-    return num_of_books, num_of_libraries, max_time, scores_of_books
+    return libraries,num_of_books, num_of_libraries, max_time, scores_of_books
 
 
 def get_best_books(library, books_scanned, current_time, max_time, scores_of_books):
     time = max_time - library.sign_up_time - current_time
 
-    sorted_books = sorted(library.books - books_scanned, key=lambda b: -scores_of_books[b])
+    sorted_books = sorted(library.set_of_books - books_scanned, key=lambda b: -scores_of_books[b])
 
     return list(sorted_books)[:time*library.books_per_day]
 
@@ -58,7 +59,8 @@ def score(library, books_scanned, current_time, libraries_signed, max_time, scor
 
 
 def schedule(libraries, max_time, scores_of_books):
-    results_books = results_libraries = []
+    results_books = []
+    results_libraries = []
     libraries_signed = set()
     books_scanned = set()
     current_time = 0
@@ -92,9 +94,9 @@ def schedule(libraries, max_time, scores_of_books):
     return results_books, results_libraries
 
 
-libraries = []
-num_of_books, num_of_libraries, max_time, scores_of_books = read_from_file('input_file.txt')
-schedule(libraries, max_time, scores_of_books)
-
+libraries, num_of_books, num_of_libraries, max_time, scores_of_books = read_from_file('input_file.txt')
+result_books, result_libraries = schedule(libraries, max_time, scores_of_books)
+print(result_books)
+print(result_libraries)
 
 
