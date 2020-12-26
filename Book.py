@@ -12,5 +12,8 @@ class Book:
     def borrow_book(self):
         self.borrow = True  # borrows the book
 
-    def is_available(self):  # was borrowed or not
-        return not self.borrow
+    def return_score(self, key):  # was borrowed or not
+        if key == self.book_id:
+            return self.score
+        else:
+            return None

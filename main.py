@@ -98,5 +98,3 @@ libraries, num_of_books, num_of_libraries, max_time, scores_of_books = read_from
 result_books, result_libraries = schedule(libraries, max_time, scores_of_books)
 print(result_books)
 print(result_libraries)
-
-
